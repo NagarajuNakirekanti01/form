@@ -1,0 +1,76 @@
+.dialog-container {
+  min-width: 500px;
+  
+  @media (max-width: 768px) {
+    min-width: auto;
+    width: 100%;
+  }
+}
+
+.user-form {
+  .form-section {
+    margin-bottom: 2rem;
+    
+    h3 {
+      color: #333;
+      margin-bottom: 1rem;
+      font-weight: 500;
+      border-bottom: 2px solid #e0e0e0;
+      padding-bottom: 0.5rem;
+    }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      
+      @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+      }
+      
+      mat-form-field {
+        width: 100%;
+      }
+      
+      .status-field {
+        display: flex;
+        align-items: center;
+        padding: 1rem 0;
+        
+        mat-slide-toggle {
+          font-size: 1rem;
+        }
+      }
+    }
+  }
+  
+  .validation-summary {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    background-color: #fff3e0;
+    border-radius: 4px;
+    border-left: 4px solid #ff9800;
+    margin-top: 1rem;
+    
+    mat-icon {
+      font-size: 1.2rem;
+    }
+    
+    span {
+      color: #e65100;
+      font-weight: 500;
+    }
+  }
+}
+
+mat-dialog-actions {
+  padding: 1rem 0;
+  gap: 1rem;
+  
+  button {
+    min-width: 100px;
+  }
+}

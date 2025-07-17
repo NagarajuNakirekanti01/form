@@ -1,0 +1,183 @@
+<div class="users-container">
+  <div class="users-header">
+    <h1 class="page-title">User Management</h1>
+    <button mat-raised-button color="primary" (click)="openUserDialog()">
+      <mat-icon>person_add</mat-icon>
+      Add User
+    </button>
+  </div>
+
+  <!-- Search and Filter -->
+  <mat-card class="filter-card">
+    <mat-card-content>
+      <div class="filter-row">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Search users...</mat-label>
+          <input matInput [(ngModel)]="searchTerm" (input)="applyFilter()" placeholder="Name, email, or department">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+        
+        <mat-form-field appearance="outline">
+          <mat-label>Department</mat-label>
+          <mat-select [(ngModel)]="selectedDepartment" (selectionChange)="applyFilter()">
+            <mat-option value="">All Departments</mat-option>
+            <mat-option value="Engineering">Engineering</mat-option>
+            <mat-option value="Design">Design</mat-option>
+            <mat-option value="Management">Management</mat-option>
+            <mat-option value="Marketing">Marketing</mat-option>
+          </mat-select>
+        </mat-form-field>
+        
+        <mat-form-field appearance="outline">
+          <mat-label>Status</mat-label>
+          <mat-select [(ngModel)]="selectedStatus" (selectionChange)="applyFilter()">
+            <mat-option value="">All Status</mat-option>
+            <mat-option value="active">Active</mat-option>
+            <mat-option value="inactive">Inactive</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Users Table -->
+  <mat-card class="table-card">
+    <mat-card-content>
+      <div class="table-container">
+        <table mat-table [dataSource]="dataSource" matSort class="users-table">
+          <!-- Avatar Column -->
+          <ng-container matColumnDef="avatar">
+            <th mat-header-cell *matHeaderCellDef>Avatar</th>
+            <td mat-cell *matCellDef="let user">
+              <div class="user-avatar">
+                <mat-icon>person</mat-icon>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Name Column -->
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+            <td mat-cell *matCellDef="let user">
+              <div class="user-name" [appHighlight]="'#e3f2fd'">
+                <strong>{{ user.firstName }} {{ user.lastName }}</strong>
+                <div class="user-role">{{ user.role }}</div>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Email Column -->
+          <ng-container matColumnDef="email">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Email</th>
+            <td mat-cell *matCellDef="let user">{{ user.email }}</td>
+          </ng-container>
+
+          <!-- Department Column -->
+          <ng-container matColumnDef="department">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Department</th>
+            <td mat-cell *matCellDef="let user">
+              <mat-chip-set>
+                <mat-chip>{{ user.department }}</mat-chip>
+              </mat-chip-set>
+            </td>
+          </ng-container>
+
+          <!-- Status Column -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+            <td mat-cell *matCellDef="let user">
+              <span class="status-badge" [class.active]="user.isActive" [class.inactive]="!user.isActive">
+                {{ user.isActive ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Join Date Column -->
+          <ng-container matColumnDef="joinDate">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Join Date</th>
+            <td mat-cell *matCellDef="let user">{{ user.joinDate | date:'mediumDate' }}</td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let user">
+              <div class="action-buttons">
+                <button mat-icon-button color="primary" (click)="editUser(user)" matTooltip="Edit User">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="deleteUser(user)" matTooltip="Delete User">
+                  <mat-icon>delete</mat-icon>
+                </button>
+                <button mat-icon-button (click)="toggleUserStatus(user)" 
+                        [matTooltip]="user.isActive ? 'Deactivate User' : 'Activate User'">
+                  <mat-icon>{{ user.isActive ? 'block' : 'check_circle' }}</mat-icon>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;" 
+              [appShowHide]="true" 
+              (click)="selectUser(row)"
+              [class.selected]="selectedUser?.id === row.id"></tr>
+        </table>
+      </div>
+
+      <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- User Details Panel -->
+  <mat-card class="details-card" *ngIf="selectedUser" [appShowHide]="!!selectedUser">
+    <mat-card-header>
+      <mat-card-title>User Details</mat-card-title>
+      <button mat-icon-button (click)="clearSelection()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="user-details">
+        <div class="detail-row">
+          <strong>Full Name:</strong>
+          <span>{{ selectedUser.firstName }} {{ selectedUser.lastName }}</span>
+        </div>
+        <div class="detail-row">
+          <strong>Email:</strong>
+          <span>{{ selectedUser.email }}</span>
+        </div>
+        <div class="detail-row">
+          <strong>Phone:</strong>
+          <span>{{ selectedUser.phone }}</span>
+        </div>
+        <div class="detail-row">
+          <strong>Date of Birth:</strong>
+          <span>{{ selectedUser.dateOfBirth | date:'longDate' }}</span>
+        </div>
+        <div class="detail-row">
+          <strong>Gender:</strong>
+          <span>{{ selectedUser.gender | titlecase }}</span>
+        </div>
+        <div class="detail-row">
+          <strong>Department:</strong>
+          <span>{{ selectedUser.department }}</span>
+        </div>
+        <div class="detail-row">
+          <strong>Role:</strong>
+          <span>{{ selectedUser.role }}</span>
+        </div>
+        <div class="detail-row">
+          <strong>Join Date:</strong>
+          <span>{{ selectedUser.joinDate | date:'longDate' }}</span>
+        </div>
+        <div class="detail-row">
+          <strong>Status:</strong>
+          <span class="status-badge" [class.active]="selectedUser.isActive" [class.inactive]="!selectedUser.isActive">
+            {{ selectedUser.isActive ? 'Active' : 'Inactive' }}
+          </span>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

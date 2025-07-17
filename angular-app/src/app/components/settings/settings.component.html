@@ -1,0 +1,275 @@
+<div class="settings-container">
+  <h1 class="page-title">Settings</h1>
+  
+  <div class="settings-layout">
+    <!-- Settings Navigation -->
+    <mat-card class="settings-nav">
+      <mat-nav-list>
+        <a mat-list-item 
+           *ngFor="let section of settingSections" 
+           (click)="selectSection(section.id)"
+           [class.active]="activeSection === section.id">
+          <mat-icon matListItemIcon>{{ section.icon }}</mat-icon>
+          <span matListItemTitle>{{ section.title }}</span>
+        </a>
+      </mat-nav-list>
+    </mat-card>
+    
+    <!-- Settings Content -->
+    <mat-card class="settings-content">
+      <!-- General Settings -->
+      <div *ngIf="activeSection === 'general'" [appShowHide]="activeSection === 'general'">
+        <h2>General Settings</h2>
+        <form [formGroup]="generalForm" class="settings-form">
+          <div class="form-section">
+            <h3>Application Preferences</h3>
+            
+            <mat-form-field appearance="outline">
+              <mat-label>Theme</mat-label>
+              <mat-select formControlName="theme">
+                <mat-option value="light">Light</mat-option>
+                <mat-option value="dark">Dark</mat-option>
+                <mat-option value="auto">Auto</mat-option>
+              </mat-select>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline">
+              <mat-label>Language</mat-label>
+              <mat-select formControlName="language">
+                <mat-option value="en">English</mat-option>
+                <mat-option value="es">Spanish</mat-option>
+                <mat-option value="fr">French</mat-option>
+                <mat-option value="de">German</mat-option>
+              </mat-select>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline">
+              <mat-label>Timezone</mat-label>
+              <mat-select formControlName="timezone">
+                <mat-option value="UTC">UTC</mat-option>
+                <mat-option value="EST">Eastern Time</mat-option>
+                <mat-option value="PST">Pacific Time</mat-option>
+                <mat-option value="CET">Central European Time</mat-option>
+              </mat-select>
+            </mat-form-field>
+            
+            <div class="toggle-group">
+              <mat-slide-toggle formControlName="autoSave" color="primary">
+                Auto-save changes
+              </mat-slide-toggle>
+              
+              <mat-slide-toggle formControlName="compactMode" color="primary">
+                Compact mode
+              </mat-slide-toggle>
+              
+              <mat-slide-toggle formControlName="showTooltips" color="primary">
+                Show tooltips
+              </mat-slide-toggle>
+            </div>
+          </div>
+        </form>
+      </div>
+      
+      <!-- Notifications Settings -->
+      <div *ngIf="activeSection === 'notifications'" [appShowHide]="activeSection === 'notifications'">
+        <h2>Notification Settings</h2>
+        <form [formGroup]="notificationForm" class="settings-form">
+          <div class="form-section">
+            <h3>Email Notifications</h3>
+            <div class="notification-group">
+              <mat-slide-toggle formControlName="emailEnabled" color="primary">
+                Enable email notifications
+              </mat-slide-toggle>
+              
+              <div class="notification-options" [appShowHide]="notificationForm.get('emailEnabled')?.value">
+                <mat-checkbox formControlName="newUserEmails">New user registrations</mat-checkbox>
+                <mat-checkbox formControlName="systemAlerts">System alerts</mat-checkbox>
+                <mat-checkbox formControlName="weeklyReports">Weekly reports</mat-checkbox>
+                <mat-checkbox formControlName="securityAlerts">Security alerts</mat-checkbox>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-section">
+            <h3>Push Notifications</h3>
+            <div class="notification-group">
+              <mat-slide-toggle formControlName="pushEnabled" color="primary">
+                Enable push notifications
+              </mat-slide-toggle>
+              
+              <div class="notification-options" [appShowHide]="notificationForm.get('pushEnabled')?.value">
+                <mat-checkbox formControlName="instantMessages">Instant messages</mat-checkbox>
+                <mat-checkbox formControlName="taskReminders">Task reminders</mat-checkbox>
+                <mat-checkbox formControlName="meetingAlerts">Meeting alerts</mat-checkbox>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-section">
+            <h3>Notification Schedule</h3>
+            <mat-form-field appearance="outline">
+              <mat-label>Quiet hours start</mat-label>
+              <input matInput type="time" formControlName="quietHoursStart">
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline">
+              <mat-label>Quiet hours end</mat-label>
+              <input matInput type="time" formControlName="quietHoursEnd">
+            </mat-form-field>
+          </div>
+        </form>
+      </div>
+      
+      <!-- Security Settings -->
+      <div *ngIf="activeSection === 'security'" [appShowHide]="activeSection === 'security'">
+        <h2>Security Settings</h2>
+        <form [formGroup]="securityForm" class="settings-form">
+          <div class="form-section">
+            <h3>Password Settings</h3>
+            
+            <mat-form-field appearance="outline">
+              <mat-label>Current Password</mat-label>
+              <input matInput type="password" formControlName="currentPassword">
+              <mat-error *ngIf="securityForm.get('currentPassword')?.hasError('required')">
+                Current password is required
+              </mat-error>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline">
+              <mat-label>New Password</mat-label>
+              <input matInput type="password" formControlName="newPassword">
+              <mat-error *ngIf="securityForm.get('newPassword')?.hasError('required')">
+                New password is required
+              </mat-error>
+              <mat-error *ngIf="securityForm.get('newPassword')?.hasError('minlength')">
+                Password must be at least 8 characters
+              </mat-error>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline">
+              <mat-label>Confirm New Password</mat-label>
+              <input matInput type="password" formControlName="confirmPassword">
+              <mat-error *ngIf="securityForm.get('confirmPassword')?.hasError('required')">
+                Please confirm your password
+              </mat-error>
+              <mat-error *ngIf="securityForm.hasError('passwordMismatch')">
+                Passwords do not match
+              </mat-error>
+            </mat-form-field>
+            
+            <button mat-raised-button color="primary" (click)="changePassword()" 
+                    [disabled]="securityForm.invalid">
+              Change Password
+            </button>
+          </div>
+          
+          <div class="form-section">
+            <h3>Two-Factor Authentication</h3>
+            <div class="security-option">
+              <mat-slide-toggle formControlName="twoFactorEnabled" color="primary">
+                Enable Two-Factor Authentication
+              </mat-slide-toggle>
+              <p class="option-description">
+                Add an extra layer of security to your account
+              </p>
+            </div>
+          </div>
+          
+          <div class="form-section">
+            <h3>Session Management</h3>
+            <div class="security-option">
+              <mat-slide-toggle formControlName="rememberMe" color="primary">
+                Remember me on this device
+              </mat-slide-toggle>
+              <p class="option-description">
+                Stay logged in for 30 days
+              </p>
+            </div>
+            
+            <mat-form-field appearance="outline">
+              <mat-label>Session timeout (minutes)</mat-label>
+              <input matInput type="number" formControlName="sessionTimeout" min="5" max="480">
+            </mat-form-field>
+          </div>
+        </form>
+      </div>
+      
+      <!-- Privacy Settings -->
+      <div *ngIf="activeSection === 'privacy'" [appShowHide]="activeSection === 'privacy'">
+        <h2>Privacy Settings</h2>
+        <form [formGroup]="privacyForm" class="settings-form">
+          <div class="form-section">
+            <h3>Data Collection</h3>
+            <div class="privacy-option">
+              <mat-slide-toggle formControlName="analyticsEnabled" color="primary">
+                Allow analytics data collection
+              </mat-slide-toggle>
+              <p class="option-description">
+                Help us improve the application by sharing anonymous usage data
+              </p>
+            </div>
+            
+            <div class="privacy-option">
+              <mat-slide-toggle formControlName="crashReporting" color="primary">
+                Enable crash reporting
+              </mat-slide-toggle>
+              <p class="option-description">
+                Automatically send crash reports to help us fix issues
+              </p>
+            </div>
+          </div>
+          
+          <div class="form-section">
+            <h3>Profile Visibility</h3>
+            <mat-form-field appearance="outline">
+              <mat-label>Profile visibility</mat-label>
+              <mat-select formControlName="profileVisibility">
+                <mat-option value="public">Public</mat-option>
+                <mat-option value="team">Team only</mat-option>
+                <mat-option value="private">Private</mat-option>
+              </mat-select>
+            </mat-form-field>
+            
+            <div class="privacy-option">
+              <mat-slide-toggle formControlName="showOnlineStatus" color="primary">
+                Show online status
+              </mat-slide-toggle>
+              <p class="option-description">
+                Let others see when you're online
+              </p>
+            </div>
+          </div>
+          
+          <div class="form-section">
+            <h3>Data Management</h3>
+            <div class="data-actions">
+              <button mat-stroked-button color="primary" (click)="exportData()">
+                <mat-icon>download</mat-icon>
+                Export My Data
+              </button>
+              
+              <button mat-stroked-button color="warn" (click)="deleteAccount()">
+                <mat-icon>delete_forever</mat-icon>
+                Delete Account
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+      
+      <!-- Save Actions -->
+      <div class="settings-actions" [appShowHide]="hasUnsavedChanges()">
+        <div class="unsaved-indicator">
+          <mat-icon color="warn">warning</mat-icon>
+          <span>You have unsaved changes</span>
+        </div>
+        <div class="action-buttons">
+          <button mat-button (click)="resetCurrentForm()">Reset</button>
+          <button mat-raised-button color="primary" (click)="saveCurrentSettings()">
+            Save Changes
+          </button>
+        </div>
+      </div>
+    </mat-card>
+  </div>
+</div>
